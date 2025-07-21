@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import "./index.css";
 const AuthSystem = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [selectedRole, setSelectedRole] = useState("");
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
     confirmPassword: "",
     firstName: "",
@@ -31,16 +34,71 @@ const AuthSystem = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", { role: selectedRole, ...formData });
-    // Handle authentication logic here
-    alert(`${isLogin ? "Login" : "Signup"} successful for ${selectedRole}!`);
+
+    if (!selectedRole) {
+      toast.error("Please select your role.");
+      return;
+    }
+
+    if (!formData.username || !formData.password) {
+      toast.error("username and password are required.");
+      return;
+    }
+
+    const roleLoginEndpoints = {
+      admin: "http://gibsbrokersapi.newgibsonline.com/api/Users/login",
+      insurance:
+        "http://gibsbrokersapi.newgibsonline.com/api/InsCompanies/login",
+      client:
+        "http://gibsbrokersapi.newgibsonline.com/api/InsuredClients/login",
+      broker: "http://gibsbrokersapi.newgibsonline.com/api/Brokers/login",
+    };
+
+    const loginUrl = roleLoginEndpoints[selectedRole];
+
+    if (!loginUrl) {
+      toast.error("Invalid role selected.");
+      return;
+    }
+
+    try {
+      const res = await fetch(loginUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "*/*",
+        },
+        body: JSON.stringify({
+          username: formData.username, // username = username in your UI
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+      if (!res.ok) {
+        toast.error(data.message || "Login failed.");
+        return;
+      }
+
+      toast.success("Login successful!");
+      console.log("Logged in:", data);
+
+      // You can save token or user data if needed:
+      // localStorage.setItem("token", data.token);
+
+      resetForm();
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Something went wrong during login.");
+    }
   };
 
   const resetForm = () => {
     setFormData({
-      email: "",
+      username: "",
       password: "",
       confirmPassword: "",
       firstName: "",
@@ -260,6 +318,8 @@ const AuthSystem = () => {
 
   return (
     <div className="auth-container">
+      <ToastContainer position="top-center" />
+
       <div className="auth-card">
         <div className="auth-header">
           <h1>{isLogin ? "Welcome Back" : "Create Account"}</h1>
@@ -267,7 +327,7 @@ const AuthSystem = () => {
         </div>
 
         <div className="auth-body">
-          <div onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <div className="role-selection">
               <h3>Select Your Role</h3>
               <div className="role-grid">
@@ -289,14 +349,14 @@ const AuthSystem = () => {
             {selectedRole && (
               <>
                 <div className="form-group">
-                  <label>Email Address</label>
+                  <label>username Address</label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+                    type="username"
+                    name="username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     required
-                    placeholder="Enter your email"
+                    placeholder="Enter your username"
                   />
                 </div>
 
@@ -337,7 +397,7 @@ const AuthSystem = () => {
                 </button>
               </>
             )}
-          </div>
+          </form>
 
           <div className="auth-switch">
             <p>

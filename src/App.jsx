@@ -77,7 +77,7 @@ const AuthSystem = () => {
       });
 
       const data = await res.json();
-      console.log(data);
+console.log(data)
       if (!res.ok) {
         toast.error(data.message || "Login failed.");
         return;
@@ -349,7 +349,7 @@ const AuthSystem = () => {
             {selectedRole && (
               <>
                 <div className="form-group">
-                  <label>username Address</label>
+                  <label>Username</label>
                   <input
                     type="username"
                     name="username"

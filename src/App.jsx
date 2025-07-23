@@ -86,7 +86,7 @@ const AuthSystem = () => {
     }
 
     const data = await res.json();
-console.log(data)
+
     toast.success("Login successful!");
     console.log("Logged in:", data);
 

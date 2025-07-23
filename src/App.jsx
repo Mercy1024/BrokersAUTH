@@ -48,12 +48,12 @@ const AuthSystem = () => {
     }
 
     const roleLoginEndpoints = {
-      admin: "http://gibsbrokersapi.newgibsonline.com/api/Users/login",
+      admin: "https://gibsbrokersapi.newgibsonline.com/api/Users/login",
       insurance:
-        "http://gibsbrokersapi.newgibsonline.com/api/InsCompanies/login",
+        "https://gibsbrokersapi.newgibsonline.com/api/InsCompanies/login",
       client:
-        "http://gibsbrokersapi.newgibsonline.com/api/InsuredClients/login",
-      broker: "http://gibsbrokersapi.newgibsonline.com/api/Brokers/login",
+        "https://gibsbrokersapi.newgibsonline.com/api/InsuredClients/login",
+      broker: "https://gibsbrokersapi.newgibsonline.com/api/Brokers/login",
     };
 
     const loginUrl = roleLoginEndpoints[selectedRole];

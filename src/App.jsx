@@ -35,66 +35,70 @@ const AuthSystem = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!selectedRole) {
-      toast.error("Please select your role.");
-      return;
-    }
+  if (!selectedRole) {
+    toast.error("Please select your role.");
+    return;
+  }
 
-    if (!formData.username || !formData.password) {
-      toast.error("username and password are required.");
-      return;
-    }
+  if (!formData.username || !formData.password) {
+    toast.error("Username and password are required.");
+    return;
+  }
 
-    const roleLoginEndpoints = {
-      admin: "http://gibsbrokersapi.newgibsonline.com/api/Users/login",
-      insurance:
-        "http://gibsbrokersapi.newgibsonline.com/api/InsCompanies/login",
-      client:
-        "http://gibsbrokersapi.newgibsonline.com/api/InsuredClients/login",
-      broker: "http://gibsbrokersapi.newgibsonline.com/api/Brokers/login",
-    };
-
-    const loginUrl = roleLoginEndpoints[selectedRole];
-
-    if (!loginUrl) {
-      toast.error("Invalid role selected.");
-      return;
-    }
-
-    try {
-      const res = await fetch(loginUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "*/*",
-        },
-        body: JSON.stringify({
-          username: formData.username, // username = username in your UI
-          password: formData.password,
-        }),
-      });
-
-      const data = await res.json();
-console.log(data)
-      if (!res.ok) {
-        toast.error(data.message || "Login failed.");
-        return;
-      }
-
-      toast.success("Login successful!");
-      console.log("Logged in:", data);
-
-      // You can save token or user data if needed:
-      // localStorage.setItem("token", data.token);
-
-      resetForm();
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Something went wrong during login.");
-    }
+  const roleLoginEndpoints = {
+    admin: "http://gibsbrokersapi.newgibsonline.com/api/Users/login",
+    insurance:
+      "http://gibsbrokersapi.newgibsonline.com/api/InsCompanies/login",
+    client:
+      "http://gibsbrokersapi.newgibsonline.com/api/InsuredClients/login",
+    broker: "http://gibsbrokersapi.newgibsonline.com/api/Brokers/login",
   };
+
+  const loginUrl = roleLoginEndpoints[selectedRole];
+
+  if (!loginUrl) {
+    toast.error("Invalid role selected.");
+    return;
+  }
+
+  try {
+    const res = await fetch(loginUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+      body: JSON.stringify({
+        username: formData.username,
+        password: formData.password,
+      }),
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+
+    if (!res.ok) {
+      const errorText = contentType.includes("application/json")
+        ? (await res.json()).message
+        : await res.text(); // fallback for plain text like "Invalid credentials"
+      throw new Error(errorText || "Login failed.");
+    }
+
+    const data = await res.json();
+console.log(data)
+    toast.success("Login successful!");
+    console.log("Logged in:", data);
+
+    // Optional: save auth token
+    // localStorage.setItem("token", data.token);
+
+    resetForm();
+  } catch (err) {
+    console.error("Login error:", err.message);
+    toast.error(`Login error: ${err.message}`);
+  }
+};
 
   const resetForm = () => {
     setFormData({
